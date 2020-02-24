@@ -1,0 +1,66 @@
+﻿@using WebApplication.Data
+@using Microsoft.Extensions.Logging
+
+@page "/listOfData"
+
+@inject CustomHttpClient Http
+@inject AppSettingsService AppSettingsService
+@inject ILogger<ListOfData> Logger
+
+<h2>Data Details</h2>
+<p>
+    <a href="/addData">Create Data</a>
+</p>
+@if (_loadFailed)
+{
+<h3>Sorry, we could not load data from web service due to an error.</h3>
+}
+else if (_dataItems == null)
+{
+<p><em>Loading...</em></p>
+}
+else
+{
+<table class='table'>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var data in _dataItems)
+        {
+            <tr>
+                <td>@data.Name</td>
+                <td>@data.Description</td>
+                <td>
+                    <a href='/editData/@data.Id'>Edit</a>
+                    <a href='/deleteData/@data.Id'>Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+
+@code {
+    DataModel[] _dataItems;
+    string _baseUrl;
+    private bool _loadFailed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _loadFailed = false;
+            _baseUrl = AppSettingsService.GetBaseUrl();
+            _dataItems = await Http.GetJsonAsync<DataModel[]>(_baseUrl + "/api/data");
+        }
+        catch (Exception ex)
+        {
+            _loadFailed = true;
+            Logger.LogError(ex, "Failed to Load Data");
+        }
+    }
+}     

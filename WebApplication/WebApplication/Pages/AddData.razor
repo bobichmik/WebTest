@@ -1,0 +1,50 @@
+﻿@using WebApplication.Data
+
+@page "/addData"
+
+@inject CustomHttpClient Http
+@inject NavigationManager NavigationManager
+@inject AppSettingsService AppSettingsService
+
+<h2>Create Data</h2>
+<hr />
+<form>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-group">
+                <label for="Name" class="control-label">Name</label>
+                <input for="Name" class="form-control" @bind="@data.Name" />
+            </div>
+            <div class="form-group">
+                <label for="Description" class="control-label">Description</label>
+                <input for="Description" class="form-control" @bind="@data.Description" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <input type="button" class="btn btn-primary" @onclick="@CreateData" value="Save" />
+                <input type="button" class="btn" @onclick="@Cancel" value="Cancel" />
+            </div>
+        </div>
+    </div>
+</form>
+
+@code {
+
+    DataModel data = new DataModel();
+    string baseUrl;
+
+    protected async Task CreateData()
+    {
+        baseUrl = AppSettingsService.GetBaseUrl();
+        await Http.PostJsonAsync(baseUrl + "/api/data", data);
+        NavigationManager.NavigateTo("listOfData");
+    }
+
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("listOfData");
+    }
+}     
